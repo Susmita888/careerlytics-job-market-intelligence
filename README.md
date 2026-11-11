@@ -1,6 +1,8 @@
-# Skillmap: Job Market Intelligence Platform
+# Careerlytics – AI-Powered Job Market Intelligence Platform
 
-Collects job postings, extracts the skills they ask for, and recommends jobs to users based on their resume and skills. It also shows skill gaps and market analytics.
+Careerlytics is a full-stack job market intelligence platform
+that analyzes job market trends, extracts skills from resumes,
+recommends relevant jobs, and identifies skill gaps.
 
 **Stack:** Python · FastAPI · SQLAlchemy · PostgreSQL (SQLite for quick local use) · scikit-learn · optional Sentence Transformers · PyMuPDF · React · Vite · Tailwind · Recharts · Docker
 

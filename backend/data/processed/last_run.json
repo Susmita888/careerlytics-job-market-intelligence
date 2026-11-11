@@ -1,0 +1,12 @@
+{
+    "source": "indian-kaggle",
+    "dataset": "data/raw/indian-job-market-dataset-2025.xlsx",
+    "run_at": "2026-11-04T20:44:50.870752",
+    "extracted": 5000,
+    "transformed": 5000,
+    "unique": 4859,
+    "inserted": 4859,
+    "skipped": 0,
+    "indian_jobs_in_database": 4859,
+    "synthetic_jobs_preserved": 600
+}

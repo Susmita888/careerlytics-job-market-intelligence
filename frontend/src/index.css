@@ -1,0 +1,215 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Careerlytics premium dark theme */
+:root {
+  color-scheme: dark;
+
+  --paper: 9 13 26;
+  --ink: 241 245 249;
+  --muted: 148 163 184;
+  --line: 51 65 85;
+
+  --brand: 139 92 246;
+  --brand-dark: 124 58 237;
+  --brand-soft: 46 31 83;
+
+  --match: 52 211 153;
+  --match-soft: 20 83 65;
+
+  --gap: 251 191 36;
+  --gap-soft: 87 65 25;
+
+  --surface: 17 24 39;
+}
+
+/* Optional light theme if your Nav has a theme toggle */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --paper: 242 244 247;
+  --ink: 14 23 38;
+  --muted: 91 102 119;
+  --line: 213 219 229;
+
+  --brand: 51 71 214;
+  --brand-dark: 39 55 159;
+  --brand-soft: 230 233 251;
+
+  --match: 21 138 94;
+  --match-soft: 221 243 233;
+
+  --gap: 181 100 10;
+  --gap-soft: 251 235 211;
+
+  --surface: 255 255 255;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    min-height: 100vh;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display tracking-tight;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  :focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-brand;
+  }
+
+  ::selection {
+    background: rgb(var(--brand) / 0.35);
+    color: white;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand text-white hover:bg-brand-dark;
+  }
+
+  .btn-ghost {
+    @apply btn border border-line bg-surface text-ink hover:bg-paper;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink placeholder:text-muted transition;
+  }
+
+  .input:focus {
+    @apply border-brand outline-none ring-2 ring-brand/20;
+  }
+
+  .panel {
+    @apply rounded-2xl border border-line bg-surface p-5;
+  }
+
+  .text-muted {
+    color: rgb(var(--muted));
+  }
+
+  .text-brand {
+    color: rgb(var(--brand));
+  }
+
+  .text-brand-dark {
+    color: rgb(var(--brand-dark));
+  }
+
+  .bg-brand {
+    background-color: rgb(var(--brand));
+  }
+
+  .bg-brand-soft {
+    background-color: rgb(var(--brand-soft));
+  }
+
+  .bg-paper {
+    background-color: rgb(var(--paper));
+  }
+
+  .bg-surface {
+    background-color: rgb(var(--surface));
+  }
+
+  .border-line {
+    border-color: rgb(var(--line));
+  }
+
+  .text-ink {
+    color: rgb(var(--ink));
+  }
+
+  .bg-gap-soft {
+    background-color: rgb(var(--gap-soft));
+  }
+
+  .text-gap {
+    color: rgb(var(--gap));
+  }
+}
+
+/* Theme-aware legacy surfaces */
+:root[data-theme="dark"] .bg-white {
+  background-color: rgb(var(--surface));
+}
+
+:root[data-theme="dark"] .hover\:bg-white:hover {
+  background-color: rgb(var(--surface));
+}
+
+:root[data-theme="dark"] .text-black {
+  color: rgb(var(--ink));
+}
+
+/* Subtle scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(var(--paper));
+}
+
+::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8B5CF6;
+}
+
+/* Floating animation */
+@keyframes careerFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.career-float {
+  animation: careerFloat 6s ease-in-out infinite;
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}

@@ -44,7 +44,7 @@ def user_inputs(db: Session, user: User) -> tuple[list[str], str]:
 def recommend(db: Session, user: User, limit: int = 20, location: str | None = None):
     skills, text = user_inputs(db, user)
     rec = get_recommender(db)
-    scored = rec.score(skills, text)
+    scored = rec.score(skills, text, top_k=500)
     ids = [r["job_id"] for r in scored]
     jobs = {j.id: j for j in db.query(Job).filter(Job.id.in_(ids[: max(limit * 5, 200)])).all()}
     saved = {s.job_id for s in db.query(SavedJob).filter(SavedJob.user_id == user.id)}

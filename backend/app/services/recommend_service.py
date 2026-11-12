@@ -27,7 +27,12 @@ def get_recommender(db: Session) -> Recommender:
     key = (db.query(func.count(Job.id)).scalar(), db.query(func.max(Job.id)).scalar())
     with _lock:
         if _cache["key"] != key:
-            jobs = db.query(Job).all()
+            jobs = (
+    db.query(Job)
+    .order_by(Job.posted_date.desc().nullslast(), Job.id.desc())
+    .limit(3000)
+    .all()
+)
             recs = [JobRecord(j.id, [s.name for s in j.skills], f"{j.title}. {j.description}") for j in jobs]
             _cache.update(key=key, rec=Recommender(recs, settings.use_embeddings, settings.embedding_model))
         return _cache["rec"]

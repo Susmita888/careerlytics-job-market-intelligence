@@ -46,26 +46,29 @@ def skill_gap(top_n: int = Query(20, ge=5, le=50), user: User = Depends(current_
 @router.get("/skills/roles", response_model=list[RoleOption])
 def available_roles(db: Session = Depends(get_db)):
     """Return selectable job roles with their job counts."""
+
+    normalized_role = func.lower(func.trim(Job.role_family))
+
     rows = (
         db.query(
-            Job.role_family,
-            func.count(Job.id).label("job_count")
+            normalized_role.label("role"),
+            func.count(Job.id).label("job_count"),
         )
         .filter(
             Job.role_family.isnot(None),
-            func.lower(func.trim(Job.role_family)) != "other",
-            func.trim(Job.role_family) != ""
+            normalized_role != "other",
+            func.trim(Job.role_family) != "",
         )
-        .group_by(func.lower(func.trim(Job.role_family)))
+        .group_by(normalized_role)
         .order_by(func.count(Job.id).desc())
         .all()
     )
 
     return [
         RoleOption(
-            value=role.strip().lower(),
-            label=role.strip().title(),
-            job_count=count
+            value=role,
+            label=role.title(),
+            job_count=count,
         )
         for role, count in rows
     ]

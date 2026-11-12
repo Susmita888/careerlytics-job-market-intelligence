@@ -66,37 +66,86 @@ class Recommender:
         if self.use_embeddings:
             self.embeddings = _Embedder.encode(texts)
 
-    def score(self, user_skills: list[str], user_text: str = "") -> list[dict]:
-        if not self.jobs:
-            return []
-        query = (user_text or "") + " " + " ".join(user_skills)
-        if self.matrix is not None and query.strip():
-            tfidf = cosine_similarity(self.vectorizer.transform([query]), self.matrix).ravel()
-        else:
-            tfidf = np.zeros(len(self.jobs))
-        if self.use_embeddings:
-            embed = (self.embeddings @ _Embedder.encode([query])[0]).clip(0, 1)
-            w = WEIGHTS
-        else:
-            embed = np.zeros(len(self.jobs))
-            total = WEIGHTS["skill"] + WEIGHTS["tfidf"]
-            w = {"skill": WEIGHTS["skill"] / total, "tfidf": WEIGHTS["tfidf"] / total, "embed": 0.0}
+   
+def score(
+    self,
+    user_skills: list[str],
+    user_text: str = "",
+    top_k: int | None = None,
+) -> list[dict]:
+    if not self.jobs:
+        return []
 
-        results = []
-        for i, job in enumerate(self.jobs):
-            s, matched, missing = skill_overlap(user_skills, job.skills)
-            final = w["skill"] * s + w["tfidf"] * float(tfidf[i]) + w["embed"] * float(embed[i])
-            results.append({
-                "job_id": job.id,
-                "score": round(final * 100, 1),
-                "skill_score": round(s * 100, 1),
-                "text_score": round(float(tfidf[i]) * 100, 1),
-                "semantic_score": round(float(embed[i]) * 100, 1) if self.use_embeddings else None,
-                "matched_skills": matched,
-                "missing_skills": missing,
-            })
-        results.sort(key=lambda r: r["score"], reverse=True)
-        return results
+    query = (user_text or "") + " " + " ".join(user_skills)
+
+    if self.matrix is not None and query.strip():
+        tfidf = cosine_similarity(
+            self.vectorizer.transform([query]),
+            self.matrix
+        ).ravel()
+    else:
+        tfidf = np.zeros(len(self.jobs))
+
+    if self.use_embeddings:
+        embed = (
+            self.embeddings @ _Embedder.encode([query])[0]
+        ).clip(0, 1)
+        w = WEIGHTS
+    else:
+        embed = np.zeros(len(self.jobs))
+        total = WEIGHTS["skill"] + WEIGHTS["tfidf"]
+        w = {
+            "skill": WEIGHTS["skill"] / total,
+            "tfidf": WEIGHTS["tfidf"] / total,
+            "embed": 0.0,
+        }
+
+    skill_scores = np.zeros(len(self.jobs))
+    matched_missing = []
+
+    for i, job in enumerate(self.jobs):
+        s, matched, missing = skill_overlap(user_skills, job.skills)
+        skill_scores[i] = s
+        matched_missing.append((matched, missing))
+
+    final_scores = (
+        w["skill"] * skill_scores
+        + w["tfidf"] * tfidf
+        + w["embed"] * embed
+    )
+
+    # Select only the highest-scoring candidates when requested.
+    if top_k is not None and 0 < top_k < len(self.jobs):
+        indices = np.argpartition(
+            final_scores, -top_k
+        )[-top_k:]
+    else:
+        indices = np.arange(len(self.jobs))
+
+    # Sort only the selected candidates.
+    indices = indices[
+        np.argsort(final_scores[indices])[::-1]
+    ]
+
+    results = []
+
+    for i in indices:
+        matched, missing = matched_missing[i]
+
+        results.append({
+            "job_id": self.jobs[i].id,
+            "score": round(float(final_scores[i]) * 100, 1),
+            "skill_score": round(float(skill_scores[i]) * 100, 1),
+            "text_score": round(float(tfidf[i]) * 100, 1),
+            "semantic_score": (
+                round(float(embed[i]) * 100, 1)
+                if self.use_embeddings else None
+            ),
+            "matched_skills": matched,
+            "missing_skills": missing,
+        })
+
+    return results
 
 
 def explain(r: dict) -> str:
